@@ -1,0 +1,74 @@
+export interface Product {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    image: string;
+    category: string;
+    available: boolean;
+}
+
+export interface Category {
+    id: string;
+    name: string;
+    icon: string;
+}
+
+export interface StoreConfig {
+    name: string;
+    logo: string;
+    whatsapp: string;
+    address: string;
+    pixKey?: string;
+    pixQrCode?: string;
+    acceptsCard?: boolean;
+    acceptsCash?: boolean;
+}
+
+export const INITIAL_DATA = {
+    store: {
+        name: "Burger Grill",
+        logo: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&auto=format&fit=crop&q=60",
+        whatsapp: "5511999999999",
+        address: "Rua das Delícias, 123 - Centro",
+        pixKey: "",
+        pixQrCode: "",
+        acceptsCard: true,
+        acceptsCash: true
+    },
+    categories: [
+        { id: "1", name: "Burgers", icon: "Pizza" },
+        { id: "2", name: "Pizzas", icon: "Pizza" },
+        { id: "3", name: "Bebidas", icon: "Coffee" },
+        { id: "4", name: "Sobremesas", icon: "Cake" }
+    ],
+    products: [
+        {
+            id: "p1",
+            name: "Classic Burger",
+            description: "Hambúrguer de 150g, queijo, alface, tomate e maionese especial.",
+            price: 25.90,
+            image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=60",
+            category: "1",
+            available: true
+        },
+        {
+            id: "p2",
+            name: "Cheeseburger Duplo",
+            description: "Dois hambúrgueres, queijo dobro e molho especial.",
+            price: 35.00,
+            image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&auto=format&fit=crop&q=60",
+            category: "1",
+            available: true
+        },
+        {
+            id: "p3",
+            name: "Pizza Margherita",
+            description: "Molho de tomate, mussarela e manjericão fresco.",
+            price: 49.90,
+            image: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=500&auto=format&fit=crop&q=60",
+            category: "2",
+            available: true
+        }
+    ]
+};
