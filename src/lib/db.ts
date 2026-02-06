@@ -8,7 +8,18 @@ export async function getData() {
     const GIST_ID = process.env.GIST_ID;
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
-    // 1. Tenta pegar do Gist se configurado
+    // 2. Fallback: Tenta pegar do arquivo local data.json
+    if (fs.existsSync(DB_FILE_PATH)) {
+        try {
+            const fileContent = fs.readFileSync(DB_FILE_PATH, 'utf-8');
+            const localData = JSON.parse(fileContent);
+            return { ...INITIAL_DATA, ...localData }; // Mescla para evitar quebras
+        } catch (error) {
+            console.error("Erro ao ler banco local:", error);
+        }
+    }
+
+    // 1. Tenta pegar do Gist se configurado (Prioridade)
     if (GIST_ID && GITHUB_TOKEN) {
         try {
             const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
@@ -23,21 +34,16 @@ export async function getData() {
                 const gist = await response.json();
                 const file = gist.files['data.json'];
                 if (file && file.content) {
-                    return JSON.parse(file.content);
+                    const gistData = JSON.parse(file.content);
+                    // Se o Gist estiver vazio ou incompleto, usa os dados iniciais como base
+                    if (!gistData.products || !gistData.store) {
+                        return INITIAL_DATA;
+                    }
+                    return { ...INITIAL_DATA, ...gistData };
                 }
             }
         } catch (error) {
             console.error("Erro ao buscar do Gist:", error);
-        }
-    }
-
-    // 2. Fallback: Tenta pegar do arquivo local data.json
-    if (fs.existsSync(DB_FILE_PATH)) {
-        try {
-            const fileContent = fs.readFileSync(DB_FILE_PATH, 'utf-8');
-            return JSON.parse(fileContent);
-        } catch (error) {
-            console.error("Erro ao ler banco local:", error);
         }
     }
 
