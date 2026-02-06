@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Save, Plus, Trash2, LayoutDashboard, Utensils, Settings, LogOut, ChevronRight, Upload, ImageIcon, X, Images } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Product, Category, StoreConfig } from '@/lib/data';
+import { BRANDING } from '@/lib/branding';
 
 export default function AdminDashboard() {
     const [data, setData] = useState<any>(null);
@@ -262,6 +263,29 @@ export default function AdminDashboard() {
                     </button>
                 </header>
 
+                {/* EDIÇÃO RÁPIDA DO NOME - LOGO NO TOPO */}
+                <div className="mb-8 bg-primary/5 p-6 rounded-[2.5rem] border-2 border-primary/20">
+                    <div className="flex items-center justify-between mb-2 px-2">
+                        <label className="text-[10px] font-black uppercase text-primary tracking-[0.2em]">Nome do Aplicativo / Restaurante</label>
+                        <button
+                            onClick={() => {
+                                if (confirm("Restaurar nome padrão do sistema?")) {
+                                    setData({ ...data, store: { ...data.store, name: BRANDING.name } });
+                                }
+                            }}
+                            className="text-[10px] bg-primary text-white px-3 py-1 rounded-full font-bold hover:scale-105 transition-transform"
+                        >
+                            Resetar para o Código
+                        </button>
+                    </div>
+                    <input
+                        value={data.store.name}
+                        onChange={(e) => setData({ ...data, store: { ...data.store, name: e.target.value } })}
+                        className="w-full bg-white border-none rounded-3xl p-5 font-black text-2xl text-slate-800 shadow-sm focus:ring-4 focus:ring-primary/20 outline-none"
+                        placeholder="Escreva o nome aqui..."
+                    />
+                </div>
+
                 {activeTab === 'products' && (
                     <div className="space-y-6">
                         {/* Category Selector for Admin */}
@@ -413,12 +437,25 @@ export default function AdminDashboard() {
                 {activeTab === 'config' && (
                     <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 max-w-2xl space-y-8">
                         <div className="grid gap-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase text-slate-400 tracking-widest pl-2">Nome da Loja</label>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between pl-2">
+                                    <label className="text-xs font-black uppercase text-slate-400 tracking-widest">Nome da Loja</label>
+                                    <button
+                                        onClick={() => {
+                                            if (confirm("Deseja voltar para o nome padrão do Branding?")) {
+                                                setData({ ...data, store: { ...data.store, name: BRANDING.name } });
+                                            }
+                                        }}
+                                        className="text-[10px] text-primary hover:underline font-bold"
+                                    >
+                                        Resgatar do Branding
+                                    </button>
+                                </div>
                                 <input
                                     value={data.store.name}
                                     onChange={(e) => setData({ ...data, store: { ...data.store, name: e.target.value } })}
-                                    className="w-full bg-slate-50 border-none rounded-2xl p-5 font-bold text-lg focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Digite o nome do restaurante aqui..."
+                                    className="w-full bg-slate-50 border-2 border-primary/10 rounded-2xl p-5 font-bold text-xl text-primary focus:ring-4 focus:ring-primary/20 focus:bg-white transition-all outline-none"
                                 />
                             </div>
                             <div className="space-y-2">

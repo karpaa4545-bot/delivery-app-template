@@ -1,6 +1,10 @@
 {
   "store": {
+<<<<<<< HEAD
     "name": "WINNER LUCH",
+=======
+    "name": "Burguer Master",
+>>>>>>> 5f5c9d5 (meus produtos novos)
     "logo": "/uploads/1770366812950.jpeg",
     "whatsapp": "5511999999999",
     "address": "Rua das Delícias, 123 - Centro",
@@ -37,7 +41,7 @@
       "name": "Classic Burger",
       "description": "Hambúrguer de 150g, queijo, alface, tomate e maionese especial.",
       "price": 40.9,
-      "image": "/uploads/1770381180583.jpg",
+      "image": "/uploads/1770390928471.png",
       "category": "1",
       "available": true
     },
@@ -46,7 +50,7 @@
       "name": "Cheeseburger Duplo",
       "description": "Dois hambúrgueres, queijo dobro e molho especial.",
       "price": 50,
-      "image": "/uploads/1770381185016.jpg",
+      "image": "/uploads/1770390932480.png",
       "category": "1",
       "available": true
     },

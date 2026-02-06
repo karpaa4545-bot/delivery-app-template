@@ -105,7 +105,7 @@ export default function DigitalMenu() {
         message += `*Forma de Pagamento:* ${paymentMethod === 'PIX' ? 'PIX' : paymentMethod === 'CARD' ? 'Cartão (Levar Maquininha)' : 'Dinheiro'}\n`;
 
         if (paymentMethod === 'PIX') {
-            message += `\n_Por favor, envie o comprovante do PIX abaixo para confirmarmos seu pedido!_`;
+            message += `\n🚨 *Atenção:* Por favor, envie o *COMPROVANTE DO PIX* logo abaixo para podermos preparar o seu pedido!`;
         }
 
         return encodeURIComponent(message);
@@ -347,7 +347,7 @@ export default function DigitalMenu() {
                                             <div className="flex-1">
                                                 <span className="font-bold block">PIX</span>
                                                 {paymentMethod === 'PIX' && (
-                                                    <div className="mt-2 space-y-2">
+                                                    <div className="mt-2 space-y-2 animate-in fade-in slide-in-from-top-1 duration-300">
                                                         <div className="flex items-center gap-2 bg-white border rounded-lg p-2">
                                                             <span className="text-xs text-slate-500 font-mono truncate flex-1">{data.store.pixKey}</span>
                                                             <button
@@ -361,6 +361,10 @@ export default function DigitalMenu() {
                                                                 <Copy className="w-4 h-4" />
                                                             </button>
                                                         </div>
+                                                        <p className="text-[11px] text-green-600 font-bold flex items-center gap-1">
+                                                            <Check className="w-3 h-3" />
+                                                            Envie o comprovante no WhatsApp após finalizar!
+                                                        </p>
                                                         {data.store.pixQrCode && (
                                                             <div className="flex justify-center bg-white p-2 rounded-lg border border-slate-100">
                                                                 <img src={data.store.pixQrCode} alt="QR Code PIX" className="w-32 h-32 object-contain" />
