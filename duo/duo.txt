@@ -1,0 +1,47 @@
+Abrir o Admin: https://delivery-app-template.vercel.app/admin
+Senha: KARPA4545
+Ir na aba "Configurações"
+Editar o campo "Nome do Restaurante"
+Clicar em "Salvar Alterações"
+
+Trocar o Nome do Domínio (.vercel.app):
+Passo a Passo:
+Acesse o Dashboard da Vercel:
+
+Vá em: https://vercel.com/dashboard
+Clique no projeto "delivery-app-template"
+Vá em Settings:
+
+Clique na aba "Settings" (no topo)
+No menu lateral, clique em "Domains"
+Editar o domínio:
+
+Você vai ver: delivery-app-template.vercel.app
+Clique em "Edit" (ou nos 3 pontinhos → Edit)
+Digite o novo nome (ex: meu-restaurante.vercel.app)
+Clique em "Save"
+
+🎉 PARABÉNS! SEU APP ESTÁ NO AR! 🎉
+
+👉 https://delivery-app-template.vercel.app/
+
+O que você tem agora:
+✅ Cardápio Digital funcionando ✅ Painel Admin em: https://delivery-app-template.vercel.app/admin
+
+Senha: KARPA4545 ✅ Pedidos vão direto pro WhatsApp ✅ Pagamento PIX com QR Code ✅ Localização GPS ✅ Código no GitHub para criar apps para outros clientes
+Próximos Passos:
+1. Testar o App:
+Abra o link no celular
+Adicione produtos no carrinho
+Teste o checkout no WhatsApp
+Entre no Admin e edite os produtos
+2. Para criar apps para outros clientes:
+Vá em: https://github.com/karpaa4545-bot/delivery-app-template
+Clique em "Use this template"
+Crie um novo repositório (ex: cliente-joao)
+Importe na Vercel
+Edite os dados no Admin do novo site
+3. Personalizar (opcional):
+Trocar logo e cores
+Adicionar mais categorias
+Configurar domínio próprio (ex: restaurante.com.br)
