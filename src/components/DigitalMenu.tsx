@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Search, Menu, Info, User, Plus, Minus, X, ArrowRight, MessageCircle, ChevronRight, MapPin, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Product } from '@/lib/data';
+import { BRANDING } from '@/lib/branding';
 
 export default function DigitalMenu() {
     const [data, setData] = useState<any>(null);
@@ -28,22 +29,26 @@ export default function DigitalMenu() {
     }, []);
 
     const isStoreOpen = () => {
-        if (!data?.store?.openingHours) return true;
+        const hours = data?.store?.openingHours || (BRANDING as any).openingHours;
+        if (!hours) return true;
 
         const now = new Date();
         const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         const today = days[now.getDay()];
-        const schedule = data.store.openingHours[today];
+        const schedule = hours[today];
 
-        if (schedule.closed) return false;
+        if (!schedule || schedule.closed) return false;
 
-        const [nowH, nowM] = [now.getHours(), now.getMinutes()];
+        const nowTotal = now.getHours() * 60 + now.getMinutes();
         const [openH, openM] = schedule.open.split(':').map(Number);
         const [closeH, closeM] = schedule.close.split(':').map(Number);
 
-        const nowTotal = nowH * 60 + nowM;
         const openTotal = openH * 60 + openM;
         const closeTotal = closeH * 60 + closeM;
+
+        if (closeTotal < openTotal) {
+            return nowTotal >= openTotal || nowTotal <= closeTotal;
+        }
 
         return nowTotal >= openTotal && nowTotal <= closeTotal;
     };
