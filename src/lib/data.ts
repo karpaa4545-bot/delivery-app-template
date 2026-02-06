@@ -25,6 +25,7 @@ export interface StoreConfig {
     pixQrCode?: string;
     acceptsCard?: boolean;
     acceptsCash?: boolean;
+    openingHours: any;
 }
 
 export const INITIAL_DATA = {
@@ -36,7 +37,8 @@ export const INITIAL_DATA = {
         pixKey: BRANDING.pixKey,
         pixQrCode: "",
         acceptsCard: true,
-        acceptsCash: true
+        acceptsCash: true,
+        openingHours: BRANDING.openingHours
     },
     categories: [
         { id: "1", name: "Burgers", icon: "Pizza" },

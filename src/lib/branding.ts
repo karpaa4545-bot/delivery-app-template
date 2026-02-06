@@ -21,5 +21,16 @@ export const BRANDING = {
 
     // Redes Sociais e Mapas
     googleMapsUrl: "https://goo.gl/maps/exemplo",
-    instagramUrl: "https://instagram.com/pizzaria_exemplo"
+    instagramUrl: "https://instagram.com/pizzaria_exemplo",
+
+    // Horários de Funcionamento (Formato 24h)
+    openingHours: {
+        monday: { open: "18:00", close: "23:00", closed: false },
+        tuesday: { open: "18:00", close: "23:00", closed: false },
+        wednesday: { open: "18:00", close: "23:00", closed: false },
+        thursday: { open: "18:00", close: "23:00", closed: false },
+        friday: { open: "18:00", close: "23:59", closed: false },
+        saturday: { open: "18:00", close: "23:59", closed: false },
+        sunday: { open: "18:00", close: "23:00", closed: false },
+    }
 };

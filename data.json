@@ -7,7 +7,44 @@
     "pixKey": "67993372344",
     "pixQrCode": "/uploads/1770409719295.jpeg",
     "acceptsCard": true,
-    "acceptsCash": true
+    "acceptsCash": true,
+    "openingHours": {
+      "monday": {
+        "open": "18:00",
+        "close": "23:00",
+        "closed": true
+      },
+      "tuesday": {
+        "open": "18:00",
+        "close": "00:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "18:00",
+        "close": "00:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "18:00",
+        "close": "00:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "18:00",
+        "close": "00:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "18:00",
+        "close": "00:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "18:00",
+        "close": "00:00",
+        "closed": false
+      }
+    }
   },
   "categories": [
     {

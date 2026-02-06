@@ -27,6 +27,27 @@ export default function DigitalMenu() {
             });
     }, []);
 
+    const isStoreOpen = () => {
+        if (!data?.store?.openingHours) return true;
+
+        const now = new Date();
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const today = days[now.getDay()];
+        const schedule = data.store.openingHours[today];
+
+        if (schedule.closed) return false;
+
+        const [nowH, nowM] = [now.getHours(), now.getMinutes()];
+        const [openH, openM] = schedule.open.split(':').map(Number);
+        const [closeH, closeM] = schedule.close.split(':').map(Number);
+
+        const nowTotal = nowH * 60 + nowM;
+        const openTotal = openH * 60 + openM;
+        const closeTotal = closeH * 60 + closeM;
+
+        return nowTotal >= openTotal && nowTotal <= closeTotal;
+    };
+
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-white">
             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -167,8 +188,11 @@ export default function DigitalMenu() {
                         <div>
                             <h1 className="font-bold text-lg leading-tight uppercase tracking-tight">{data.store.name}</h1>
                             <p className="text-[10px] text-white/80 flex items-center gap-1 font-medium">
-                                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                                ESTAMOS ABERTOS
+                                <span className={cn(
+                                    "w-2 h-2 rounded-full animate-pulse",
+                                    isStoreOpen() ? "bg-green-400" : "bg-red-400"
+                                )}></span>
+                                {isStoreOpen() ? "ESTAMOS ABERTOS" : "FECHADO AGORA"}
                             </p>
                         </div>
                     </div>

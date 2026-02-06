@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, LayoutDashboard, Utensils, Settings, LogOut, ChevronRight, Upload, ImageIcon, X, Images, ShoppingCart } from 'lucide-react';
+import { Save, Plus, Trash2, LayoutDashboard, Utensils, Settings, LogOut, ChevronRight, Upload, ImageIcon, X, Images, ShoppingCart, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Product, Category, StoreConfig } from '@/lib/data';
 import { BRANDING } from '@/lib/branding';
@@ -664,6 +664,86 @@ export default function AdminDashboard() {
                                         />
                                         <span className="font-bold text-slate-700">Aceitar Dinheiro</span>
                                     </label>
+                                </div>
+
+                                {/* Horário de Funcionamento */}
+                                <div className="space-y-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-bold text-slate-900">Horário de Funcionamento</h3>
+                                        <Clock className="w-5 h-5 text-slate-400" />
+                                    </div>
+
+                                    <div className="grid gap-3">
+                                        {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => {
+                                            const labels: any = {
+                                                monday: 'Segunda', tuesday: 'Terça', wednesday: 'Quarta',
+                                                thursday: 'Quinta', friday: 'Sexta', saturday: 'Sábado', sunday: 'Domingo'
+                                            };
+                                            const schedule = (data.store.openingHours && data.store.openingHours[day]) || (BRANDING as any).openingHours[day];
+                                            return (
+                                                <div key={day} className="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl">
+                                                    <span className="w-20 font-bold text-xs uppercase text-slate-500">{labels[day]}</span>
+
+                                                    {!schedule.closed ? (
+                                                        <div className="flex items-center gap-2 flex-1">
+                                                            <input
+                                                                type="time"
+                                                                value={schedule.open}
+                                                                onChange={(e) => setData({
+                                                                    ...data,
+                                                                    store: {
+                                                                        ...data.store,
+                                                                        openingHours: {
+                                                                            ...(data.store.openingHours || (BRANDING as any).openingHours),
+                                                                            [day]: { ...schedule, open: e.target.value }
+                                                                        }
+                                                                    }
+                                                                })}
+                                                                className="bg-white border-none rounded-lg p-2 text-xs font-bold focus:ring-2 focus:ring-primary/20"
+                                                            />
+                                                            <span className="text-slate-300">até</span>
+                                                            <input
+                                                                type="time"
+                                                                value={schedule.close}
+                                                                onChange={(e) => setData({
+                                                                    ...data,
+                                                                    store: {
+                                                                        ...data.store,
+                                                                        openingHours: {
+                                                                            ...(data.store.openingHours || (BRANDING as any).openingHours),
+                                                                            [day]: { ...schedule, close: e.target.value }
+                                                                        }
+                                                                    }
+                                                                })}
+                                                                className="bg-white border-none rounded-lg p-2 text-xs font-bold focus:ring-2 focus:ring-primary/20"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <span className="flex-1 text-center font-bold text-red-400 text-xs italic">FECHADO O DIA TODO</span>
+                                                    )}
+
+                                                    <button
+                                                        onClick={() => setData({
+                                                            ...data,
+                                                            store: {
+                                                                ...data.store,
+                                                                openingHours: {
+                                                                    ...(data.store.openingHours || (BRANDING as any).openingHours),
+                                                                    [day]: { ...schedule, closed: !schedule.closed }
+                                                                }
+                                                            }
+                                                        })}
+                                                        className={cn(
+                                                            "ml-auto text-[10px] font-black uppercase px-3 py-1 rounded-lg transition-all",
+                                                            schedule.closed ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+                                                        )}
+                                                    >
+                                                        {schedule.closed ? "Abrir" : "Fechar"}
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         </div>
