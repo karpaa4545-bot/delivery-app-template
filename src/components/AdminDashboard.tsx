@@ -69,17 +69,18 @@ export default function AdminDashboard() {
 
         setUploading(path);
         try {
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+
+            if (res.status === 405 || res.status === 500) {
+                throw new Error("Upload de arquivos indisponível aqui. Use links externos (Imgur, Drive, etc).");
+            }
 
             if (!res.ok) throw new Error('Falha no upload');
 
             const result = await res.json();
             callback(result.url);
         } catch (error: any) {
-            alert(`Erro no upload local: ${error.message}`);
+            alert(`Aviso: ${error.message}\n\nDica: Copie o link da imagem e cole direto no campo de texto.`);
         } finally {
             setUploading(null);
         }
@@ -93,14 +94,16 @@ export default function AdminDashboard() {
                 body: JSON.stringify(data),
                 headers: { 'Content-Type': 'application/json' }
             });
+
             if (res.ok) {
                 alert("Alterações salvas com sucesso!");
             } else {
-                alert("Erro ao salvar: O servidor retornou um erro.");
+                const errorData = await res.json().catch(() => ({ message: res.statusText }));
+                alert(`Erro ao salvar: ${errorData.message || "Erro desconhecido"}`);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Save error:", error);
-            alert("Erro de conexão: Verifique se o servidor está rodando.");
+            alert(`Erro de conexão: ${error.message}`);
         } finally {
             setSaving(false);
         }
