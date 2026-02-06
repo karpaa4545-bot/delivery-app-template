@@ -3,9 +3,15 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* CORES DO CLIENTE - MUDE AQUI */
   --primary: #E63946;
+  /* Cor Principal */
   --secondary: #FFB703;
+  /* Cor Secundária */
   --accent: #FB8500;
+  /* Cor de Destaque */
+
   --muted: #F1F5F9;
   --muted-foreground: #64748B;
   --card: #FFFFFF;

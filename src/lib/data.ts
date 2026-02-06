@@ -1,3 +1,5 @@
+import { BRANDING } from './branding';
+
 export interface Product {
     id: string;
     name: string;
@@ -27,11 +29,11 @@ export interface StoreConfig {
 
 export const INITIAL_DATA = {
     store: {
-        name: "Burger Grill",
-        logo: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&auto=format&fit=crop&q=60",
-        whatsapp: "5511999999999",
-        address: "Rua das Delícias, 123 - Centro",
-        pixKey: "",
+        name: BRANDING.name,
+        logo: BRANDING.logo,
+        whatsapp: BRANDING.whatsapp,
+        address: BRANDING.address,
+        pixKey: BRANDING.pixKey,
         pixQrCode: "",
         acceptsCard: true,
         acceptsCash: true
