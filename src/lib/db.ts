@@ -52,7 +52,7 @@ export async function getData() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function saveData(newData: any) {
+export async function saveData(newData: any): Promise<{ success: boolean; message: string }> {
     const GIST_ID = process.env.GIST_ID;
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
@@ -74,19 +74,30 @@ export async function saveData(newData: any) {
                     }
                 })
             });
-            return response.ok;
-        } catch (error) {
+
+            if (response.ok) {
+                return { success: true, message: "Salvo no Gist com sucesso!" };
+            } else {
+                return { success: false, message: `Erro Gist: ${response.status} ${response.statusText}` };
+            }
+        } catch (error: any) {
             console.error("Erro ao salvar no Gist:", error);
-            // Se falhar no Gist, continua para tentar salvar localmente como backup
+            return { success: false, message: `Erro de Conexão Gist: ${error.message}` };
         }
     }
 
     // 2. Salva localmente em data.json (Funciona no Windows/Linux locais)
     try {
+        // Na Vercel, isso vai falhar se não formos persistentes, mas tentamos
+        if (process.env.NODE_ENV === 'production') {
+            // Se estivermos em produção sem Gist, avisar o usuário explicitamente
+            return { success: false, message: "Erro: Na Vercel (Online), é OBRIGATÓRIO configurar o GIST_ID e GITHUB_TOKEN para salvar." };
+        }
+
         fs.writeFileSync(DB_FILE_PATH, JSON.stringify(newData, null, 2));
-        return true;
-    } catch (error) {
+        return { success: true, message: "Salvo localmente com sucesso!" };
+    } catch (error: any) {
         console.error("Erro ao salvar localmente:", error);
-        return false;
+        return { success: false, message: `Erro ao salvar disco: ${error.message}` };
     }
 }

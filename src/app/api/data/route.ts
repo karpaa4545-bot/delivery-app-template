@@ -8,11 +8,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
     const body = await request.json();
-    const success = await saveData(body);
+    const result = await saveData(body);
 
-    if (success) {
-        return NextResponse.json({ message: 'Success' });
+    if (result.success) {
+        return NextResponse.json({ message: result.message });
     } else {
-        return NextResponse.json({ message: 'Error' }, { status: 500 });
+        return NextResponse.json({ message: result.message }, { status: 500 });
     }
 }
