@@ -31,13 +31,19 @@ export default function AdminDashboard() {
         }
     };
 
-    useEffect(() => {
+    const fetchOrders = () => {
+        setLoading(true);
         fetch('/api/data')
             .then(res => res.json())
             .then(json => {
                 setData(json);
                 setLoading(false);
-            });
+            })
+            .catch(() => setLoading(false));
+    };
+
+    useEffect(() => {
+        fetchOrders();
     }, []);
 
     const updateCategory = (id: string, name: string) => {
@@ -263,7 +269,14 @@ export default function AdminDashboard() {
                         <h2 className="text-3xl font-black text-slate-900 tracking-tight capitalize">
                             {activeTab === 'orders' ? 'Pedidos Recebidos' : activeTab === 'products' ? 'Gerenciar Cardápio' : activeTab === 'categories' ? 'Gerenciar Categorias' : activeTab === 'banners' ? 'Gerenciar Banners' : 'Configurações da Loja'}
                         </h2>
-                        <p className="text-muted-foreground mt-1">Edite as informações da sua loja em tempo real.</p>
+                        <div className="flex items-center gap-2 mt-1">
+                            <p className="text-muted-foreground">Administre sua loja em tempo real.</p>
+                            {activeTab === 'orders' && (
+                                <button onClick={fetchOrders} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold hover:bg-primary/20 transition-all uppercase">
+                                    🔄 Atualizar Lista
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <button
                         onClick={handleSave}

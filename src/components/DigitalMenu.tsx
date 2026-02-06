@@ -158,11 +158,16 @@ export default function DigitalMenu() {
         try {
             // Salva o pedido no banco de dados (Gist)
             const newData = { ...data, orders: [orderData, ...(data.orders || [])] };
-            await fetch('/api/data', {
+            const response = await fetch('/api/data', {
                 method: 'POST',
                 body: JSON.stringify(newData),
                 headers: { 'Content-Type': 'application/json' }
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Erro ao salvar pedido");
+            }
 
             const cleanPhone = data.store.whatsapp.replace(/\D/g, '');
             const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
