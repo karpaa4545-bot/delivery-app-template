@@ -1,17 +1,29 @@
 import { INITIAL_DATA } from '@/lib/data';
-import { kv } from '@vercel/kv';
 
-// Chave para armazenar os dados no Vercel KV
-const STORE_KEY = 'delivery_app_data';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GIST_ID = process.env.GIST_ID;
 
 export async function getData() {
-    // Tenta buscar do Vercel KV (funciona na produção)
-    if (process.env.KV_REST_API_URL) {
+    // Se tiver GitHub Gist configurado, busca de lá
+    if (GITHUB_TOKEN && GIST_ID) {
         try {
-            const data = await kv.get(STORE_KEY);
-            if (data) return data;
+            const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                },
+                cache: 'no-store'
+            });
+
+            if (response.ok) {
+                const gist = await response.json();
+                const content = gist.files['data.json']?.content;
+                if (content) {
+                    return JSON.parse(content);
+                }
+            }
         } catch (error) {
-            console.error("Erro ao buscar do KV:", error);
+            console.error("Erro ao buscar do Gist:", error);
         }
     }
 
@@ -20,18 +32,32 @@ export async function getData() {
 }
 
 export async function saveData(newData: any) {
-    // Salva no Vercel KV (funciona na produção)
-    if (process.env.KV_REST_API_URL) {
+    // Salva no GitHub Gist
+    if (GITHUB_TOKEN && GIST_ID) {
         try {
-            await kv.set(STORE_KEY, newData);
-            return true;
+            const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    files: {
+                        'data.json': {
+                            content: JSON.stringify(newData, null, 2)
+                        }
+                    }
+                })
+            });
+
+            return response.ok;
         } catch (error) {
-            console.error("Erro ao salvar no KV:", error);
+            console.error("Erro ao salvar no Gist:", error);
             return false;
         }
     }
 
-    // Se não tiver KV configurado, retorna erro
-    console.warn("Vercel KV não configurado. Configure em: https://vercel.com/dashboard");
+    console.warn("GitHub Gist não configurado. Configure GITHUB_TOKEN e GIST_ID nas variáveis de ambiente.");
     return false;
 }
