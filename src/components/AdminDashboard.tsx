@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, LayoutDashboard, Utensils, Settings, LogOut, ChevronRight, Upload, ImageIcon, X } from 'lucide-react';
+import { Save, Plus, Trash2, LayoutDashboard, Utensils, Settings, LogOut, ChevronRight, Upload, ImageIcon, X, Images } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Product, Category, StoreConfig } from '@/lib/data';
 
 export default function AdminDashboard() {
     const [data, setData] = useState<any>(null);
-    const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'config'>('products');
+    const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'config' | 'banners'>('products');
     const [activeAdminCategory, setActiveAdminCategory] = useState<string>("all");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -225,6 +225,17 @@ export default function AdminDashboard() {
                         Configurações
                         <ChevronRight className={cn("ml-auto w-4 h-4 transition-transform", activeTab === 'config' ? "rotate-90" : "")} />
                     </button>
+                    <button
+                        onClick={() => setActiveTab('banners')}
+                        className={cn(
+                            "flex items-center gap-3 p-4 rounded-2xl transition-all font-bold group",
+                            activeTab === 'banners' ? "bg-primary text-white shadow-lg shadow-primary/20" : "hover:bg-white/5 opacity-60 hover:opacity-100"
+                        )}
+                    >
+                        <Images className="w-5 h-5" />
+                        Banners
+                        <ChevronRight className={cn("ml-auto w-4 h-4 transition-transform", activeTab === 'banners' ? "rotate-90" : "")} />
+                    </button>
                 </nav>
 
                 <button className="flex items-center gap-3 p-4 rounded-2xl opacity-40 hover:opacity-100 hover:bg-red-500/10 text-red-400 font-bold transition-all">
@@ -237,7 +248,7 @@ export default function AdminDashboard() {
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div>
                         <h2 className="text-3xl font-black text-slate-900 tracking-tight capitalize">
-                            {activeTab === 'products' ? 'Gerenciar Cardápio' : activeTab === 'categories' ? 'Gerenciar Categorias' : 'Configurações da Loja'}
+                            {activeTab === 'products' ? 'Gerenciar Cardápio' : activeTab === 'categories' ? 'Gerenciar Categorias' : activeTab === 'banners' ? 'Gerenciar Banners' : 'Configurações da Loja'}
                         </h2>
                         <p className="text-muted-foreground mt-1">Edite as informações da sua loja em tempo real.</p>
                     </div>
@@ -515,6 +526,70 @@ export default function AdminDashboard() {
                                         <span className="font-bold text-slate-700">Aceitar Dinheiro</span>
                                     </label>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'banners' && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 gap-6">
+                            {/* Novo Banner */}
+                            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary/20 gap-4">
+                                <div className="p-4 bg-primary/5 rounded-full">
+                                    <Images className="w-8 h-8 text-primary" />
+                                </div>
+                                <div className="text-center">
+                                    <h3 className="font-black text-slate-800">Adicionar Novo Banner</h3>
+                                    <p className="text-sm text-slate-400">Cole a URL da imagem ou faça upload</p>
+                                </div>
+                                <div className="flex gap-2 w-full max-w-md">
+                                    <input
+                                        type="text"
+                                        placeholder="https://..."
+                                        className="flex-1 bg-slate-50 border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                const val = (e.target as HTMLInputElement).value;
+                                                if (val) setData((prev: any) => ({ ...prev, banners: [...(prev.banners || []), val] }));
+                                                (e.target as HTMLInputElement).value = '';
+                                            }
+                                        }}
+                                    />
+                                    <label className="bg-primary text-white px-6 rounded-xl flex items-center justify-center font-bold cursor-pointer hover:bg-primary/90 transition-all">
+                                        Upload
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) handleImageUpload(file, 'banners', (url) => setData((prev: any) => ({ ...prev, banners: [...(prev.banners || []), url] })));
+                                            }}
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Lista de Banners */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {data.banners?.map((banner: string, index: number) => (
+                                    <div key={index} className="relative group rounded-2xl overflow-hidden shadow-md aspect-video bg-slate-100">
+                                        <img src={banner} className="w-full h-full object-cover" alt="Banner" />
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    const newBanners = [...data.banners];
+                                                    newBanners.splice(index, 1);
+                                                    setData({ ...data, banners: newBanners });
+                                                }}
+                                                className="bg-red-500 text-white p-3 rounded-full hover:scale-110 transition-transform"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>

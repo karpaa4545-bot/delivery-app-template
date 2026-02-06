@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Search, Menu, Info, User, Plus, Minus, X, ArrowRight, MessageCircle, ChevronRight, MapPin } from 'lucide-react';
+import { ShoppingCart, Search, Menu, Info, User, Plus, Minus, X, ArrowRight, MessageCircle, ChevronRight, MapPin, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Product } from '@/lib/data';
 
@@ -15,6 +15,7 @@ export default function DigitalMenu() {
     const [paymentMethod, setPaymentMethod] = useState<string>("");
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [locationStatus, setLocationStatus] = useState<string>("");
+    const [observation, setObservation] = useState("");
 
     useEffect(() => {
         fetch('/api/data')
@@ -97,6 +98,10 @@ export default function DigitalMenu() {
             message += `*Endereço:* (Cliente não enviou GPS)\n`;
         }
 
+        if (observation) {
+            message += `\n*Observação / Mesa:* ${observation}\n`;
+        }
+
         message += `*Forma de Pagamento:* ${paymentMethod === 'PIX' ? 'PIX' : paymentMethod === 'CARD' ? 'Cartão (Levar Maquininha)' : 'Dinheiro'}\n`;
 
         if (paymentMethod === 'PIX') {
@@ -107,7 +112,8 @@ export default function DigitalMenu() {
     };
 
     const checkout = () => {
-        const whatsappUrl = `https://wa.me/${data.store.whatsapp}?text=${formatWhatsAppMessage()}`;
+        const cleanPhone = data.store.whatsapp.replace(/\D/g, '');
+        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
         window.open(whatsappUrl, '_blank');
     };
 
@@ -146,6 +152,17 @@ export default function DigitalMenu() {
                     />
                 </div>
             </header>
+
+            {/* Banners Carousel */}
+            {data.banners && data.banners.length > 0 && (
+                <div className="pt-4 px-4 overflow-x-auto no-scrollbar flex gap-4 snap-x">
+                    {data.banners.map((banner: string, idx: number) => (
+                        <div key={idx} className="min-w-[85%] sm:min-w-[400px] h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-black/5 snap-center shrink-0">
+                            <img src={banner} className="w-full h-full object-cover" alt="Banner" />
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Categories Horizontal Scroll */}
             <div className="bg-white shadow-sm sticky top-[138px] z-40 overflow-x-auto no-scrollbar flex items-center gap-4 p-4 border-b">
@@ -288,6 +305,16 @@ export default function DigitalMenu() {
                             ))}
 
                             <div className="pt-4 border-t border-dashed border-slate-200">
+                                <h4 className="font-bold text-slate-800 mb-3">Observações</h4>
+                                <textarea
+                                    value={observation}
+                                    onChange={(e) => setObservation(e.target.value)}
+                                    placeholder="Ex: Sem cebola, ou Mesa 12..."
+                                    className="w-full bg-slate-50 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 min-h-[80px]"
+                                />
+                            </div>
+
+                            <div className="pt-4 border-t border-dashed border-slate-200">
                                 <h4 className="font-bold text-slate-800 mb-3">Entrega</h4>
                                 <button
                                     onClick={getLocation}
@@ -321,7 +348,19 @@ export default function DigitalMenu() {
                                                 <span className="font-bold block">PIX</span>
                                                 {paymentMethod === 'PIX' && (
                                                     <div className="mt-2 space-y-2">
-                                                        <span className="text-xs text-slate-500 block">Chave: {data.store.pixKey}</span>
+                                                        <div className="flex items-center gap-2 bg-white border rounded-lg p-2">
+                                                            <span className="text-xs text-slate-500 font-mono truncate flex-1">{data.store.pixKey}</span>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    navigator.clipboard.writeText(data.store.pixKey || '');
+                                                                    alert("Chave PIX copiada!");
+                                                                }}
+                                                                className="text-primary hover:bg-primary/10 p-1 rounded transition-colors"
+                                                            >
+                                                                <Copy className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
                                                         {data.store.pixQrCode && (
                                                             <div className="flex justify-center bg-white p-2 rounded-lg border border-slate-100">
                                                                 <img src={data.store.pixQrCode} alt="QR Code PIX" className="w-32 h-32 object-contain" />
