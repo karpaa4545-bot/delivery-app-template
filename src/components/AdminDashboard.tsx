@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, LayoutDashboard, Utensils, Settings, LogOut, ChevronRight, Upload, ImageIcon, X, Images } from 'lucide-react';
+import { Save, Plus, Trash2, LayoutDashboard, Utensils, Settings, LogOut, ChevronRight, Upload, ImageIcon, X, Images, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Product, Category, StoreConfig } from '@/lib/data';
 import { BRANDING } from '@/lib/branding';
 
 export default function AdminDashboard() {
     const [data, setData] = useState<any>(null);
-    const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'config' | 'banners'>('products');
+    const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'config' | 'banners' | 'orders'>('orders');
+    const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [activeAdminCategory, setActiveAdminCategory] = useState<string>("all");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -194,6 +195,17 @@ export default function AdminDashboard() {
 
                 <nav className="flex flex-col gap-2 flex-1">
                     <button
+                        onClick={() => setActiveTab('orders')}
+                        className={cn(
+                            "flex items-center gap-3 p-4 rounded-2xl transition-all font-bold group",
+                            activeTab === 'orders' ? "bg-primary text-white shadow-lg shadow-primary/20" : "hover:bg-white/5 opacity-60 hover:opacity-100"
+                        )}
+                    >
+                        <ShoppingCart className="w-5 h-5" />
+                        Pedidos
+                        <ChevronRight className={cn("ml-auto w-4 h-4 transition-transform", activeTab === 'orders' ? "rotate-90" : "")} />
+                    </button>
+                    <button
                         onClick={() => setActiveTab('products')}
                         className={cn(
                             "flex items-center gap-3 p-4 rounded-2xl transition-all font-bold group",
@@ -249,7 +261,7 @@ export default function AdminDashboard() {
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div>
                         <h2 className="text-3xl font-black text-slate-900 tracking-tight capitalize">
-                            {activeTab === 'products' ? 'Gerenciar Cardápio' : activeTab === 'categories' ? 'Gerenciar Categorias' : activeTab === 'banners' ? 'Gerenciar Banners' : 'Configurações da Loja'}
+                            {activeTab === 'orders' ? 'Pedidos Recebidos' : activeTab === 'products' ? 'Gerenciar Cardápio' : activeTab === 'categories' ? 'Gerenciar Categorias' : activeTab === 'banners' ? 'Gerenciar Banners' : 'Configurações da Loja'}
                         </h2>
                         <p className="text-muted-foreground mt-1">Edite as informações da sua loja em tempo real.</p>
                     </div>
@@ -285,6 +297,96 @@ export default function AdminDashboard() {
                         placeholder="Escreva o nome aqui..."
                     />
                 </div>
+
+                {activeTab === 'orders' && (
+                    <div className="space-y-6">
+                        {(!data.orders || data.orders.length === 0) ? (
+                            <div className="bg-white p-20 rounded-[3rem] text-center border border-dashed border-slate-200">
+                                <p className="text-slate-400 font-bold">Nenhum pedido recebido ainda.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4">
+                                {data.orders.map((order: any) => (
+                                    <div key={order.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-all">
+                                        <div className="space-y-1 text-left">
+                                            <div className="flex items-center gap-2">
+                                                <span className="bg-slate-100 text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider text-slate-500">#{order.id}</span>
+                                                <span className="text-xs text-slate-400">{order.date}</span>
+                                            </div>
+                                            <div className="font-black text-slate-800 text-lg">
+                                                {order.items.length} itens - R$ {order.total.toFixed(2)}
+                                            </div>
+                                            <div className="text-sm text-slate-500 font-medium">
+                                                Pagamento: <span className="text-primary font-bold uppercase">{order.payment}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedOrder(order);
+                                                    setTimeout(() => window.print(), 100);
+                                                }}
+                                                className="bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-primary/90 transition-all"
+                                            >
+                                                <Save className="w-4 h-4" /> Imprimir Comanda
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (confirm("Deseja excluir este pedido?")) {
+                                                        setData({ ...data, orders: data.orders.filter((o: any) => o.id !== order.id) });
+                                                    }
+                                                }}
+                                                className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Layout Oculto para Impressora Térmica */}
+                {selectedOrder && (
+                    <div id="printable-receipt" className="hidden print:block text-left">
+                        <div className="text-center font-bold border-b-2 border-dashed border-black pb-2 mb-2">
+                            <h3 className="uppercase">{data.store.name}</h3>
+                            <p className="text-[10px] font-normal">{data.store.address}</p>
+                            <p className="text-[10px] font-normal">{selectedOrder.date}</p>
+                        </div>
+
+                        <div className="space-y-1 mb-2">
+                            <p className="font-bold border-b border-black">ITENS DO PEDIDO</p>
+                            {selectedOrder.items.map((item: any, i: number) => (
+                                <div key={i} className="flex justify-between text-[11px]">
+                                    <span>{item.quantity}x {item.name}</span>
+                                    <span>R$ {(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="border-t-2 border-dashed border-black pt-2 space-y-1 text-[11px]">
+                            <p className="flex justify-between font-black text-[13px]">
+                                <span>TOTAL:</span>
+                                <span>R$ {selectedOrder.total.toFixed(2)}</span>
+                            </p>
+                            <p><strong>PAGAMENTO:</strong> {selectedOrder.payment}</p>
+                            {selectedOrder.observation && (
+                                <p><strong>OBS:</strong> {selectedOrder.observation}</p>
+                            )}
+                            {selectedOrder.location && (
+                                <p className="text-[10px]"><strong>GPS:</strong> {selectedOrder.location.lat}, {selectedOrder.location.lng}</p>
+                            )}
+                        </div>
+
+                        <div className="text-center mt-4 pt-4 border-t border-black">
+                            <p className="text-[10px]">Agradecemos sua preferência!</p>
+                        </div>
+                    </div>
+                )}
 
                 {activeTab === 'products' && (
                     <div className="space-y-6">

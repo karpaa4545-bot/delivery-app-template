@@ -58,5 +58,33 @@
   "banners": [
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1000&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1000&auto=format&fit=crop&q=60"
+  ],
+  "orders": [
+    {
+      "id": "i1vdif16q",
+      "items": [
+        {
+          "name": "Classic Burger",
+          "quantity": 1,
+          "price": 25.9
+        },
+        {
+          "name": "Cheeseburger Duplo",
+          "quantity": 1,
+          "price": 35
+        },
+        {
+          "name": "Pizza Margherita",
+          "quantity": 1,
+          "price": 49.9
+        }
+      ],
+      "total": 110.8,
+      "payment": "PIX",
+      "observation": "",
+      "location": null,
+      "date": "06/02/2026, 18:42:43",
+      "status": "Pendente"
+    }
   ]
 }

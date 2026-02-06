@@ -16,8 +16,7 @@ export default function DigitalMenu() {
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [locationStatus, setLocationStatus] = useState<string>("");
     const [observation, setObservation] = useState("");
-    const [isOrderFinished, setIsOrderFinished] = useState(false);
-    const [lastOrder, setLastOrder] = useState<any>(null);
+    const [savingOrder, setSavingOrder] = useState(false);
 
     useEffect(() => {
         fetch('/api/data')
@@ -113,27 +112,47 @@ export default function DigitalMenu() {
         return encodeURIComponent(message);
     };
 
-    const checkout = () => {
-        const cleanPhone = data.store.whatsapp.replace(/\D/g, '');
-        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
-
-        // Salva os dados do último pedido para impressão
-        setLastOrder({
-            items: [...cart],
+    const checkout = async () => {
+        setSavingOrder(true);
+        const orderData = {
+            id: Math.random().toString(36).substr(2, 9),
+            items: cart.map(item => ({
+                name: item.product.name,
+                quantity: item.quantity,
+                price: item.product.price
+            })),
             total: totalPrice,
             payment: paymentMethod,
             observation: observation,
             location: location,
-            date: new Date().toLocaleString('pt-BR')
-        });
+            date: new Date().toLocaleString('pt-BR'),
+            status: 'Pendente'
+        };
 
-        window.open(whatsappUrl, '_blank');
-        setIsOrderFinished(true); // Abre a tela de sucesso/impressão
-        setIsCartOpen(false);
-    };
+        try {
+            // Salva o pedido no banco de dados (Gist)
+            const newData = { ...data, orders: [orderData, ...(data.orders || [])] };
+            await fetch('/api/data', {
+                method: 'POST',
+                body: JSON.stringify(newData),
+                headers: { 'Content-Type': 'application/json' }
+            });
 
-    const handlePrint = () => {
-        window.print();
+            const cleanPhone = data.store.whatsapp.replace(/\D/g, '');
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
+            window.open(whatsappUrl, '_blank');
+
+            // Limpa o carrinho e avisa o cliente (pode ser um alert simples ou apenas redirecionar)
+            setCart([]);
+            setObservation("");
+            setPaymentMethod("");
+            setIsCartOpen(false);
+        } catch (error) {
+            console.error("Erro ao salvar pedido:", error);
+            alert("Erro ao enviar pedido. Tente novamente.");
+        } finally {
+            setSavingOrder(false);
+        }
     };
 
     return (
@@ -445,87 +464,23 @@ export default function DigitalMenu() {
 
                             <button
                                 onClick={checkout}
-                                disabled={!paymentMethod}
-                                className={cn(
-                                    "w-full h-16 rounded-2xl shadow-xl flex items-center justify-center gap-3 font-bold text-lg transition-all active:scale-[0.98]",
-                                    paymentMethod ? "bg-green-500 hover:bg-green-600 text-white" : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                                )}
+                                disabled={cart.length === 0 || !paymentMethod || savingOrder}
+                                className="w-full bg-primary text-white h-16 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-primary/90 active:scale-95 transition-all shadow-xl shadow-primary/20 disabled:opacity-50 disabled:active:scale-100"
                             >
-                                <MessageCircle className="w-6 h-6" />
-                                {paymentMethod ? "Finalizar no WhatsApp" : "Selecione o Pagamento"}
-                                <ArrowRight className="w-5 h-5" />
+                                {savingOrder ? (
+                                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <>
+                                        <MessageCircle className="w-6 h-6" />
+                                        Finalizar no WhatsApp
+                                        <ArrowRight className="w-5 h-5" />
+                                    </>
+                                )}
                             </button>
 
                             <p className="text-[10px] text-center text-muted-foreground uppercase tracking-widest font-bold">
                                 O pedido será enviado direto para o nosso WhatsApp
                             </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {/* Modal de Sucesso / Impressão de Comanda */}
-            {isOrderFinished && lastOrder && (
-                <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-                    <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl text-center space-y-6 overflow-hidden">
-                        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                            <Check className="w-10 h-10" />
-                        </div>
-                        <h2 className="text-2xl font-black text-slate-800">Pedido Enviado!</h2>
-                        <p className="text-slate-500">O seu pedido foi enviado para o WhatsApp. Deseja imprimir a comanda agora?</p>
-
-                        <div className="flex flex-col gap-3">
-                            <button
-                                onClick={handlePrint}
-                                className="w-full bg-slate-900 text-white h-16 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-xl"
-                            >
-                                <ShoppingCart className="w-6 h-6" /> Imprimir Comanda
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setIsOrderFinished(false);
-                                    setCart([]); // Limpa o carrinho para o próximo
-                                }}
-                                className="w-full bg-slate-100 text-slate-600 h-14 rounded-2xl font-bold hover:bg-slate-200 transition-all"
-                            >
-                                Voltar ao Início
-                            </button>
-                        </div>
-
-                        {/* Layout Oculto para Impressora Térmica */}
-                        <div id="printable-receipt" className="hidden print:block text-left">
-                            <div className="text-center font-bold border-b-2 border-dashed border-black pb-2 mb-2">
-                                <h3 className="uppercase">{data.store.name}</h3>
-                                <p className="text-[10px] font-normal">{data.store.address}</p>
-                                <p className="text-[10px] font-normal">{lastOrder.date}</p>
-                            </div>
-
-                            <div className="space-y-1 mb-2">
-                                <p className="font-bold border-b border-black">ITENS DO PEDIDO</p>
-                                {lastOrder.items.map((item: any, i: number) => (
-                                    <div key={i} className="flex justify-between text-[11px]">
-                                        <span>{item.quantity}x {item.product.name}</span>
-                                        <span>R$ {(item.product.price * item.quantity).toFixed(2)}</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="border-t-2 border-dashed border-black pt-2 space-y-1 text-[11px]">
-                                <p className="flex justify-between font-black text-[13px]">
-                                    <span>TOTAL:</span>
-                                    <span>R$ {lastOrder.total.toFixed(2)}</span>
-                                </p>
-                                <p><strong>PAGAMENTO:</strong> {lastOrder.payment}</p>
-                                {lastOrder.observation && (
-                                    <p><strong>OBS:</strong> {lastOrder.observation}</p>
-                                )}
-                                {lastOrder.location && (
-                                    <p className="text-[8px]">GPS: {lastOrder.location.lat}, {lastOrder.location.lng}</p>
-                                )}
-                            </div>
-
-                            <div className="text-center mt-4 pt-4 border-t border-black">
-                                <p className="text-[9px]">Obrigado pela preferência!</p>
-                            </div>
                         </div>
                     </div>
                 </div>

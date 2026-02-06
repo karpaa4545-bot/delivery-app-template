@@ -1,0 +1,43 @@
+# 📋 CONTROLE DE CLIENTES - DELIVERY APP
+
+Use este arquivo para organizar os dados de cada cliente que você criar. 
+Lembre-se: Cada cliente deve ter seu próprio GIST_ID para que os produtos não se misturem!
+
+---
+
+## 🚀 CLIENTE ATUAL (Modelo Mestre)
+**Nome:** (Ex: Burguer Master)
+**GIST_ID:** (Copie do seu arquivo .env.local)
+**GitHub:** (Ex: https://github.com/karpaa4545-bot/delivery-app-template)
+**Link do Site:** (Ex: https://delivery-app-template.vercel.app)
+
+---
+
+## 👤 CLIENTE 01
+**Nome:** _______________________
+**GIST_ID:** _____________________
+**GitHub:** ______________________
+**Link do Site:** ________________
+
+---
+
+## 👤 CLIENTE 02
+**Nome:** _______________________
+**GIST_ID:** _____________________
+**GitHub:** ______________________
+**Link do Site:** ________________
+
+---
+
+## 👤 CLIENTE 03
+**Nome:** _______________________
+**GIST_ID:** _____________________
+**GitHub:** ______________________
+**Link do Site:** ________________
+
+---
+
+### 💡 Dicas de Organização:
+1. Sempre que criar um novo Gist no GitHub, copie o ID final da URL e cole aqui.
+2. Ao subir para a Vercel, use o GIST_ID correspondente deste arquivo.
+3. Para atualizar um cliente antigo, use este código atual mas troque o GIST_ID pelo dele.
