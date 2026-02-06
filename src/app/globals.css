@@ -34,6 +34,37 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Estilos para Impressão de Comanda (Impressora Térmica) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #printable-receipt,
+  #printable-receipt * {
+    visibility: visible;
+  }
+
+  #printable-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 80mm;
+    /* Tamanho padrão de impressora térmica */
+    color: black !important;
+    background: white !important;
+    padding: 0;
+    margin: 0;
+    font-size: 12pt;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  @page {
+    margin: 0;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
