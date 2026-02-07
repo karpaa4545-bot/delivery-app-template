@@ -278,7 +278,7 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                     <button
-                        onClick={handleSave}
+                        onClick={() => handleSave()}
                         disabled={saving}
                         className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-2xl shadow-xl shadow-green-600/20 flex items-center justify-center gap-3 font-bold transition-all active:scale-95 disabled:opacity-50"
                     >
