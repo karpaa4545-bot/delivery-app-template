@@ -171,7 +171,7 @@ export default function DigitalMenu() {
 
             const cleanPhone = data.store.whatsapp.replace(/\D/g, '');
             const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
-            window.open(whatsappUrl, '_blank');
+            window.location.href = whatsappUrl;
 
             // Limpa o carrinho e avisa o cliente (pode ser um alert simples ou apenas redirecionar)
             setCart([]);
@@ -187,7 +187,7 @@ export default function DigitalMenu() {
             // Mesmo com erro no Admin, abre o WhatsApp para não perder a venda
             const cleanPhone = data.store.whatsapp.replace(/\D/g, '');
             const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
-            window.open(whatsappUrl, '_blank');
+            window.location.href = whatsappUrl;
 
             setCart([]);
             setIsCartOpen(false);
