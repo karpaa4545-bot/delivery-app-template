@@ -79,11 +79,10 @@ export default function AdminDashboard() {
         try {
             const res = await fetch('/api/upload', { method: 'POST', body: formData });
 
-            if (res.status === 405 || res.status === 500) {
-                throw new Error("Upload de arquivos indisponível aqui. Use links externos (Imgur, Drive, etc).");
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Falha no upload');
             }
-
-            if (!res.ok) throw new Error('Falha no upload');
 
             const result = await res.json();
             callback(result.url);
@@ -651,7 +650,7 @@ export default function AdminDashboard() {
                                             accept="image/*"
                                             onChange={(e) => {
                                                 const file = e.target.files?.[0];
-                                                if (file) handleImageUpload(file, 'logo', (url) => setData({ ...data, store: { ...data.store, logo: url } }));
+                                                if (file) handleImageUpload(file, 'logo', (url: string) => setData({ ...data, store: { ...data.store, logo: url } }));
                                             }}
                                         />
                                     </label>
