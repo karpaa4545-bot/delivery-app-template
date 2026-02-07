@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Search, Menu, Info, User, Plus, Minus, X, ArrowRight, MessageCircle, ChevronRight, MapPin, Copy, Check } from 'lucide-react';
+import { ShoppingCart, Search, Menu, Info, User, Plus, Minus, X, ArrowRight, MessageCircle, ChevronRight, MapPin, Copy, Check, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Product } from '@/lib/data';
 import { BRANDING } from '@/lib/branding';
@@ -18,6 +18,7 @@ export default function DigitalMenu() {
     const [locationStatus, setLocationStatus] = useState<string>("");
     const [observation, setObservation] = useState("");
     const [savingOrder, setSavingOrder] = useState(false);
+    const [neighborhood, setNeighborhood] = useState<{ name: string; fee: number } | null>(null);
 
     useEffect(() => {
         fetch('/api/data')
@@ -90,7 +91,8 @@ export default function DigitalMenu() {
     };
 
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-    const totalPrice = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+    const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+    const totalPrice = subtotal + (neighborhood?.fee || 0);
 
     const getLocation = () => {
         setLocationStatus("Obtendo localização...");
@@ -117,12 +119,20 @@ export default function DigitalMenu() {
         cart.forEach(item => {
             message += `• ${item.quantity}x ${item.product.name} - R$ ${(item.product.price * item.quantity).toFixed(2)}\n`;
         });
+        message += `\n*Subtotal: R$ ${subtotal.toFixed(2)}*`;
+        if (neighborhood) {
+            message += `\n*Entrega (${neighborhood.name}): R$ ${neighborhood.fee.toFixed(2)}*`;
+        }
         message += `\n*Total: R$ ${totalPrice.toFixed(2)}*\n\n`;
 
         if (location) {
             message += `*Localização GPS:* https://maps.google.com/?q=${location.lat},${location.lng}\n`;
         } else {
             message += `*Endereço:* (Cliente não enviou GPS)\n`;
+        }
+
+        if (neighborhood) {
+            message += `*Bairro:* ${neighborhood.name}\n`;
         }
 
         if (observation) {
@@ -148,6 +158,9 @@ export default function DigitalMenu() {
                 price: item.product.price
             })),
             total: totalPrice,
+            subtotal: subtotal,
+            deliveryFee: neighborhood?.fee || 0,
+            neighborhood: neighborhood?.name || '',
             payment: paymentMethod,
             observation: observation,
             location: location,
@@ -207,13 +220,20 @@ export default function DigitalMenu() {
                         </div>
                         <div>
                             <h1 className="font-bold text-lg leading-tight uppercase tracking-tight">{data.store.name}</h1>
-                            <p className="text-[10px] text-white/80 flex items-center gap-1 font-medium">
-                                <span className={cn(
-                                    "w-2 h-2 rounded-full animate-pulse",
-                                    isStoreOpen() ? "bg-green-400" : "bg-red-400"
-                                )}></span>
-                                {isStoreOpen() ? "ESTAMOS ABERTOS" : "FECHADO AGORA"}
-                            </p>
+                            <div className="flex flex-col gap-0.5">
+                                <p className="text-[10px] text-white/80 flex items-center gap-1 font-medium">
+                                    <span className={cn(
+                                        "w-2 h-2 rounded-full animate-pulse",
+                                        isStoreOpen() ? "bg-green-400" : "bg-red-400"
+                                    )}></span>
+                                    {isStoreOpen() ? "ESTAMOS ABERTOS" : "FECHADO AGORA"}
+                                </p>
+                                {data.store.deliveryTime && (
+                                    <p className="text-[9px] text-white/70 flex items-center gap-1 font-bold">
+                                        <Clock className="w-2.5 h-2.5" /> MÉDIA: {data.store.deliveryTime}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                     <div className="flex gap-4">
@@ -397,7 +417,9 @@ export default function DigitalMenu() {
                             </div>
 
                             <div className="pt-4 border-t border-dashed border-slate-200">
-                                <h4 className="font-bold text-slate-800 mb-3">Entrega</h4>
+                                <h4 className="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-primary" /> Entrega
+                                </h4>
                                 <button
                                     onClick={getLocation}
                                     className={cn(
@@ -409,6 +431,28 @@ export default function DigitalMenu() {
                                     {location ? "Localização Salva!" : "Usar Minha Localização GPS"}
                                 </button>
                                 {locationStatus && <p className="text-xs text-center text-slate-500 -mt-2 mb-4">{locationStatus}</p>}
+
+                                {/* Seleção de Bairro / Taxa de Entrega */}
+                                {data.store.deliveryFees && data.store.deliveryFees.length > 0 && (
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Selecione seu Bairro</p>
+                                        <select
+                                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-4 text-sm font-bold focus:border-primary focus:ring-0 transition-all cursor-pointer"
+                                            value={neighborhood?.name || ""}
+                                            onChange={(e) => {
+                                                const selected = data.store.deliveryFees.find((f: any) => f.name === e.target.value);
+                                                setNeighborhood(selected || null);
+                                            }}
+                                        >
+                                            <option value="">Selecione seu bairro...</option>
+                                            {data.store.deliveryFees.map((f: any) => (
+                                                <option key={f.id} value={f.name}>
+                                                    {f.name} - R$ {f.fee.toFixed(2)}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="pt-4 border-t border-dashed border-slate-200">
@@ -528,7 +572,8 @@ export default function DigitalMenu() {
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

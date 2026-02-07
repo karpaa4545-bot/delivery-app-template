@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, LayoutDashboard, Utensils, Settings, LogOut, ChevronRight, Upload, ImageIcon, X, Images, ShoppingCart, Clock } from 'lucide-react';
+import { Save, Plus, Trash2, LayoutDashboard, Utensils, Settings, LogOut, ChevronRight, Upload, ImageIcon, X, Images, ShoppingCart, Clock, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Product, Category, StoreConfig } from '@/lib/data';
 import { BRANDING } from '@/lib/branding';
@@ -334,16 +334,60 @@ export default function AdminDashboard() {
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-wrap gap-2">
                                             <button
                                                 onClick={() => {
                                                     setSelectedOrder(order);
                                                     setTimeout(() => window.print(), 100);
                                                 }}
-                                                className="bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-primary/90 transition-all"
+                                                className="bg-primary text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-primary/90 transition-all"
                                             >
-                                                <Save className="w-4 h-4" /> Imprimir Comanda
+                                                <Save className="w-3 h-3" /> Imprimir
                                             </button>
+
+                                            {/* Seletor de Status */}
+                                            <select
+                                                value={order.status || 'Pendente'}
+                                                onChange={(e) => {
+                                                    const newStatus = e.target.value;
+                                                    const newOrders = data.orders.map((o: any) =>
+                                                        o.id === order.id ? { ...o, status: newStatus } : o
+                                                    );
+                                                    const newData = { ...data, orders: newOrders };
+                                                    setData(newData);
+                                                    handleSave(newData);
+
+                                                    // Se o status for "Saindo para Entrega", avisa no Zap
+                                                    if (newStatus === 'Saindo para Entrega') {
+                                                        const msg = encodeURIComponent(`*Olá! Seu pedido do ${data.store.name} está saindo para entrega agora!* 🛵🍔`);
+                                                        window.open(`https://wa.me/${data.store.whatsapp.replace(/\D/g, '')}?text=${msg}`, '_blank');
+                                                    }
+                                                }}
+                                                className={cn(
+                                                    "text-[10px] font-bold px-3 py-2 rounded-xl border-none ring-1 ring-slate-200 focus:ring-primary/20",
+                                                    order.status === 'Pronto' ? "bg-green-50 text-green-600" :
+                                                        order.status === 'Saindo para Entrega' ? "bg-blue-50 text-blue-600" : "bg-orange-50 text-orange-600"
+                                                )}
+                                            >
+                                                <option value="Pendente">⏳ Pendente</option>
+                                                <option value="Preparando">🔥 Preparando</option>
+                                                <option value="Saindo para Entrega">🛵 Saiu para Entrega</option>
+                                                <option value="Pronto">✅ Entregue</option>
+                                            </select>
+
+                                            {/* Botão de Avaliação */}
+                                            {order.status === 'Pronto' && data.store.reviewLink && (
+                                                <button
+                                                    onClick={() => {
+                                                        const msg = encodeURIComponent(`*Oi! Esperamos que tenha gostado do seu pedido!* 😍\n\nSe puder nos avaliar no Google, ajuda muito o nosso trabalho: \n${data.store.reviewLink}`);
+                                                        window.open(`https://wa.me/${data.store.whatsapp.replace(/\D/g, '')}?text=${msg}`, '_blank');
+                                                    }}
+                                                    className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-yellow-200 transition-all"
+                                                >
+                                                    ⭐ Pedir Avaliação
+                                                </button>
+                                            )}
+
                                             <button
                                                 onClick={() => {
                                                     if (confirm("Deseja excluir este pedido? Para sua segurança, ele será apagado permanentemente após a confirmação.")) {
@@ -353,9 +397,9 @@ export default function AdminDashboard() {
                                                         handleSave(newData);
                                                     }
                                                 }}
-                                                className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                             >
-                                                <Trash2 className="w-5 h-5" />
+                                                <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </div>
@@ -585,6 +629,17 @@ export default function AdminDashboard() {
                                 />
                             </div>
                             <div className="space-y-2">
+                                <label className="text-xs font-black uppercase text-slate-400 tracking-widest pl-2 flex items-center gap-2">
+                                    <Clock className="w-3 h-3" /> Tempo Médio de Entrega
+                                </label>
+                                <input
+                                    value={data.store.deliveryTime || ''}
+                                    onChange={(e) => setData({ ...data, store: { ...data.store, deliveryTime: e.target.value } })}
+                                    className="w-full bg-slate-50 border-none rounded-2xl p-5 font-bold text-lg focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Ex: 40-60 min"
+                                />
+                            </div>
+                            <div className="space-y-2">
                                 <label className="text-xs font-black uppercase text-slate-400 tracking-widest pl-2 flex items-center justify-between">
                                     <span>URL da Logomarca</span>
                                     <label className="text-primary cursor-pointer hover:underline flex items-center gap-1 lowercase">
@@ -761,6 +816,73 @@ export default function AdminDashboard() {
                                         })}
                                     </div>
                                 </div>
+
+                                {/* Taxas de Entrega por Bairro */}
+                                <div className="space-y-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-bold text-slate-900">Taxas de Entrega (Bairros)</h3>
+                                        <MapPin className="w-5 h-5 text-slate-400" />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        {(data.store.deliveryFees || []).map((bairro: any, index: number) => (
+                                            <div key={bairro.id} className="flex gap-2 items-center bg-slate-50 p-2 rounded-xl">
+                                                <input
+                                                    className="flex-1 bg-white border-none rounded-lg p-2 text-xs font-bold"
+                                                    value={bairro.name}
+                                                    onChange={(e) => {
+                                                        const newFees = [...data.store.deliveryFees];
+                                                        newFees[index].name = e.target.value;
+                                                        setData({ ...data, store: { ...data.store, deliveryFees: newFees } });
+                                                    }}
+                                                />
+                                                <div className="flex items-center bg-white rounded-lg px-2">
+                                                    <span className="text-[10px] font-bold text-slate-400 mr-1">R$</span>
+                                                    <input
+                                                        type="number"
+                                                        className="w-16 bg-white border-none rounded-lg p-2 text-xs font-bold text-right"
+                                                        value={bairro.fee}
+                                                        onChange={(e) => {
+                                                            const newFees = [...data.store.deliveryFees];
+                                                            newFees[index].fee = parseFloat(e.target.value) || 0;
+                                                            setData({ ...data, store: { ...data.store, deliveryFees: newFees } });
+                                                        }}
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const newFees = data.store.deliveryFees.filter((_: any, i: number) => i !== index);
+                                                        setData({ ...data, store: { ...data.store, deliveryFees: newFees } });
+                                                    }}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button
+                                            onClick={() => {
+                                                const newBairro = { id: Math.random().toString(36).substr(2, 9), name: "Novo Bairro", fee: 0 };
+                                                setData({ ...data, store: { ...data.store, deliveryFees: [...(data.store.deliveryFees || []), newBairro] } });
+                                            }}
+                                            className="text-xs font-bold text-primary flex items-center gap-1 p-2 hover:bg-primary/5 rounded-xl w-fit transition-all active:scale-95"
+                                        >
+                                            <Plus className="w-4 h-4" /> Adicionar Bairro
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Link de Avaliação */}
+                                <div className="space-y-2 pt-4 border-t border-slate-100">
+                                    <label className="text-xs font-black uppercase text-slate-400 tracking-widest pl-2 flex items-center gap-2">
+                                        <ShoppingCart className="w-3 h-3" /> Link de Avaliação (Google/Outro)
+                                    </label>
+                                    <input
+                                        value={data.store.reviewLink || ''}
+                                        onChange={(e) => setData({ ...data, store: { ...data.store, reviewLink: e.target.value } })}
+                                        className="w-full bg-slate-50 border-none rounded-2xl p-4 text-xs font-medium focus:ring-2 focus:ring-primary/20"
+                                        placeholder="https://g.page/sua-loja/review"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -829,7 +951,7 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                 )}
-            </main >
-        </div >
+            </main>
+        </div>
     );
 }

@@ -26,6 +26,9 @@ export interface StoreConfig {
     acceptsCard?: boolean;
     acceptsCash?: boolean;
     openingHours: any;
+    deliveryFees: { id: string; name: string; fee: number }[];
+    deliveryTime?: string;
+    reviewLink?: string;
 }
 
 export const INITIAL_DATA = {
@@ -38,7 +41,14 @@ export const INITIAL_DATA = {
         pixQrCode: "",
         acceptsCard: true,
         acceptsCash: true,
-        openingHours: BRANDING.openingHours
+        openingHours: BRANDING.openingHours,
+        deliveryFees: [
+            { id: "1", name: "Centro", fee: 5.00 },
+            { id: "2", name: "Bairro Exemplo 1", fee: 7.00 },
+            { id: "3", name: "Bairro Exemplo 2", fee: 10.00 }
+        ],
+        deliveryTime: "40-60 min",
+        reviewLink: "https://g.page/sua-loja/review"
     },
     categories: [
         { id: "1", name: "Burgers", icon: "Pizza" },
