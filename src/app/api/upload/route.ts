@@ -20,40 +20,44 @@ export async function POST(request: Request) {
 
         // 1. Tenta Upload no Supabase (Nuvem)
         if (supabase) {
-            try {
-                const filePath = `uploads/${fileName}`;
-                const { error: uploadError } = await supabase.storage
-                    .from('images')
-                    .upload(filePath, buffer, {
-                        contentType: file.type || 'image/jpeg'
-                    });
+            const filePath = `uploads/${fileName}`;
+            const { error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(filePath, buffer, {
+                    contentType: file.type || 'image/jpeg',
+                    upsert: true
+                });
 
-                if (!uploadError) {
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('images')
-                        .getPublicUrl(filePath);
-                    return NextResponse.json({ url: publicUrl });
-                }
-                console.error("Erro upload Supabase, tentando local...");
-            } catch (e) {
-                console.error("Erro conexão Supabase:", e);
+            if (uploadError) {
+                console.error("Erro Supabase:", uploadError);
+                return NextResponse.json({ error: `Erro Supabase: ${uploadError.message}` }, { status: 500 });
             }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('images')
+                .getPublicUrl(filePath);
+
+            return NextResponse.json({ url: publicUrl });
         }
 
-        // 2. Fallback para Upload Local (Computador)
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
+        // 2. Fallback para Desenvolvimento Local (Apenas se não houver Supabase)
+        if (process.env.NODE_ENV === 'development') {
+            const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+
+            const filePathLocal = path.join(uploadDir, fileName);
+            fs.writeFileSync(filePathLocal, buffer);
+
+            const fileUrl = `/uploads/${fileName}`;
+            return NextResponse.json({ url: fileUrl });
         }
 
-        const filePathLocal = path.join(uploadDir, fileName);
-        fs.writeFileSync(filePathLocal, buffer);
-
-        const fileUrl = `/uploads/${fileName}`;
-        return NextResponse.json({ url: fileUrl });
+        return NextResponse.json({ error: 'Configuração de armazenamento (Supabase) ausente ou inválida.' }, { status: 500 });
 
     } catch (error: any) {
         console.error("Erro geral no upload:", error);
-        return NextResponse.json({ error: 'Erro ao processar arquivo' }, { status: 500 });
+        return NextResponse.json({ error: `Erro interno: ${error.message}` }, { status: 500 });
     }
 }
