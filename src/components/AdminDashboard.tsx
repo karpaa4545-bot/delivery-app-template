@@ -94,12 +94,12 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleSave = async () => {
+    const handleSave = async (customData?: any) => {
         setSaving(true);
         try {
             const res = await fetch('/api/data', {
                 method: 'POST',
-                body: JSON.stringify(data),
+                body: JSON.stringify(customData || data),
                 headers: { 'Content-Type': 'application/json' }
             });
 
@@ -346,8 +346,11 @@ export default function AdminDashboard() {
                                             </button>
                                             <button
                                                 onClick={() => {
-                                                    if (confirm("Deseja excluir este pedido?")) {
-                                                        setData({ ...data, orders: data.orders.filter((o: any) => o.id !== order.id) });
+                                                    if (confirm("Deseja excluir este pedido? Para sua segurança, ele será apagado permanentemente após a confirmação.")) {
+                                                        const newOrders = data.orders.filter((o: any) => o.id !== order.id);
+                                                        const newData = { ...data, orders: newOrders };
+                                                        setData(newData);
+                                                        handleSave(newData);
                                                     }
                                                 }}
                                                 className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-all"
