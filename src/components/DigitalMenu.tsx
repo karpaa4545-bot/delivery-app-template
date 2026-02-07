@@ -215,8 +215,20 @@ export default function DigitalMenu() {
             <header className="bg-primary text-white p-4 sticky top-0 z-50 shadow-md">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 bg-white">
-                            <img src={data.store.logo} alt="Logo" className="w-full h-full object-cover" />
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 bg-white flex items-center justify-center shrink-0">
+                            {data.store.logo ? (
+                                <img
+                                    src={data.store.logo}
+                                    alt="Logo"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                        (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-primary font-black text-xl">${data.store.name[0]}</span>`;
+                                    }}
+                                />
+                            ) : (
+                                <span className="text-primary font-black text-xl">{data.store.name[0]}</span>
+                            )}
                         </div>
                         <div>
                             <h1 className="font-bold text-lg leading-tight uppercase tracking-tight">{data.store.name}</h1>
