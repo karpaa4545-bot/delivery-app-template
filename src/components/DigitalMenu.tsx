@@ -178,9 +178,19 @@ export default function DigitalMenu() {
             setObservation("");
             setPaymentMethod("");
             setIsCartOpen(false);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erro ao salvar pedido:", error);
-            alert("Erro ao enviar pedido. Tente novamente.");
+
+            // Alerta o erro real para o dono saber o que falta configurar
+            alert(`Aviso: O pedido será enviado ao WhatsApp, mas não foi salvo no Painel Admin.\nMotivo: ${error.message}`);
+
+            // Mesmo com erro no Admin, abre o WhatsApp para não perder a venda
+            const cleanPhone = data.store.whatsapp.replace(/\D/g, '');
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
+            window.open(whatsappUrl, '_blank');
+
+            setCart([]);
+            setIsCartOpen(false);
         } finally {
             setSavingOrder(false);
         }
